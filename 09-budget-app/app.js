@@ -14,6 +14,7 @@ const CST = (() => {
         expValue: '.budget__expenses--value',
         incPercentage: '.budget__income--percentage',
         expPercentage: '.budget__expenses--percentage',
+        itemDelete: '.item__delete',
     };
 
     return {
@@ -39,11 +40,15 @@ const budgetControler = (function() {
 
     const data = {
         allItems: {
-            inc: [],
+            inc: [
+                {id:0, description: 'Salaire', value: 2200},
+                {id:1, description: 'Buy Books', value: 340},
+                {id:2, description: 'Revenu', value: 235},
+            ],
             exp: [],
         },
         totals: {
-            inc: 0,
+            inc: 2200,
             exp: 0
         },
         percentage: -1
@@ -75,8 +80,10 @@ const budgetControler = (function() {
     };
     
     // Remove item
-    const removeItem = (id) => {
-        
+    const removeItem = (type, id) => {
+        const arr = data.allItems[type];
+        const item = arr[];
+        console.log(arr[arr.indexOf(id)]);
     };
     
     // Remove ALL items
@@ -171,10 +178,17 @@ const UIControler = (function(CST, budgetModel) {
             }
 
         },
+        removeUIItem(elem) {
+            elem.parentNode.parentNode.parentNode.parentNode.remove();
+        },
         update(type) {
             getUIelement(DOMstrings.budgetValue).textContent = budgetControler.calculate();
             getUIelement(DOMstrings.incValue).textContent = '+ ' + budgetModel.getTotal('inc');
             getUIelement(DOMstrings.expValue).textContent = '- ' + budgetModel.getTotal('exp');
+
+            budgetModel.getData('inc').forEach(function(item) {
+                UIControler.addUIItem({id: item.id, description: item.description, value: item.value}, 'inc')
+            });
         }
     }
 })(CST, budgetControler);
@@ -194,6 +208,13 @@ const controler = (function(CST, UICtrl, budgetCtrl) {
             UIControler.addUIItem(newItem, input.type);
             // Update UI
             UICtrl.update(input.type);
+        });
+
+        getUI(DOMstrings.containerDiv).addEventListener('click', (e) => {
+            if(e.target.className === 'ion-ios-close-outline') {
+                budgetControler.remove('inc', 1);
+                UICtrl.removeUIItem(e.target);
+            }
         });
     };
 
