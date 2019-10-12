@@ -40,6 +40,19 @@ const budgetControler = (function() {
 
     const data = {
         allItems: {
+            inc: [],
+            exp: [],
+        },
+        totals: {
+            inc: 0,
+            exp: 0
+        },
+        percentage: -1
+    };
+
+    /*
+    const data = {
+        allItems: {
             inc: [
                 {id:0, description: 'Salaire', value: 2200},
                 {id:1, description: 'Buy Books', value: 340},
@@ -53,6 +66,7 @@ const budgetControler = (function() {
         },
         percentage: -1
     };
+    */
 
     // Add item
     const addItem = function(type, desc, value) {
@@ -80,10 +94,15 @@ const budgetControler = (function() {
     };
     
     // Remove item
-    const removeItem = (type, id) => {
-        const arr = data.allItems[type];
-        const item = arr[];
-        console.log(arr[arr.indexOf(id)]);
+    const removeItem = (id) => {
+        const splitID = id.split('-');
+        const type = splitID[0];
+        const ID = parseInt(splitID[1]);
+        const arr = data.allItems[type].map(function(item) {
+            return item.id;
+        }); // [1, 3, 4, 6, 7]
+        const idItem = arr.indexOf(ID);
+        data.allItems[type].splice(idItem, 1);
     };
     
     // Remove ALL items
@@ -179,16 +198,18 @@ const UIControler = (function(CST, budgetModel) {
 
         },
         removeUIItem(elem) {
-            elem.parentNode.parentNode.parentNode.parentNode.remove();
+            elem.remove();
         },
-        update(type) {
+        update() {
             getUIelement(DOMstrings.budgetValue).textContent = budgetControler.calculate();
             getUIelement(DOMstrings.incValue).textContent = '+ ' + budgetModel.getTotal('inc');
             getUIelement(DOMstrings.expValue).textContent = '- ' + budgetModel.getTotal('exp');
-
+        },
+        init() {
             budgetModel.getData('inc').forEach(function(item) {
                 UIControler.addUIItem({id: item.id, description: item.description, value: item.value}, 'inc')
             });
+            this.update();
         }
     }
 })(CST, budgetControler);
@@ -212,17 +233,26 @@ const controler = (function(CST, UICtrl, budgetCtrl) {
 
         getUI(DOMstrings.containerDiv).addEventListener('click', (e) => {
             if(e.target.className === 'ion-ios-close-outline') {
-                budgetControler.remove('inc', 1);
-                UICtrl.removeUIItem(e.target);
+                // get taget element
+                const elemDel = e.target.parentNode.parentNode.parentNode.parentNode;
+                // get attribute 'id' of target element
+                let id = elemDel.id;
+                // remove item from model
+                budgetControler.remove(id);
+                // remove item from UI
+                UICtrl.removeUIItem(elemDel);
+                // update UI
+                UICtrl.update();
             }
         });
     };
 
     return {
         init() {
+            // Set up event listeners
             setupEventListeners();
-            // Update UI
-            UICtrl.update();
+            // init UI
+            UICtrl.init();
         }
     }
 })(CST, UIControler, budgetControler);
