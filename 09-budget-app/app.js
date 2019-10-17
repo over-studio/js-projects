@@ -72,13 +72,13 @@ const budgetControler = (function() {
     const addItem = function(type, desc, value) {
         let ID, newItem;
         const arr = data.allItems[type];
-        
+
         if( arr.length > 0 ) {
             ID = arr[arr.length - 1].id + 1;
         } else {
             ID = 0;
         }
-        
+
         if(type === 'inc') {
             newItem = new Income(ID, desc, value);
             arr.push(newItem);
@@ -86,13 +86,13 @@ const budgetControler = (function() {
             newItem = new Expense(ID, desc, value);
             arr.push(newItem);
         }
-        
+
         // Update totals
         data.totals[type] += value;
 
         return newItem;
     };
-    
+
     // Remove item
     const removeItem = (id) => {
         const splitID = id.split('-');
@@ -104,15 +104,15 @@ const budgetControler = (function() {
         const idItem = arr.indexOf(ID);
         data.allItems[type].splice(idItem, 1);
     };
-    
+
     // Remove ALL items
     const removeAllItem = (id) => {
-        
+
     };
 
     // Update item
     const updateItem = (id) => {
-        
+
     };
 
     const calculateBudget = () => {
@@ -219,16 +219,23 @@ const controler = (function(CST, UICtrl, budgetCtrl) {
     const DOMstrings = CST.DOM;
     const getUI = UICtrl.getUIelement;
 
+    const addItem = () => {
+        // Get input data
+        const input = UIControler.getInput();
+        // Add item to the MODEL
+        let newItem = budgetCtrl.add(input.type, input.description, input.value);
+        // Add item to UI
+        UIControler.addUIItem(newItem, input.type);
+        // Update UI
+        UICtrl.update(input.type);
+    }
+
     const setupEventListeners = () => {
-        getUI(DOMstrings.addButton).addEventListener('click', () => {
-            // Get input data
-            const input = UIControler.getInput();
-            // Add item to the MODEL
-            let newItem = budgetCtrl.add(input.type, input.description, input.value);
-            // Add item to UI
-            UIControler.addUIItem(newItem, input.type);
-            // Update UI
-            UICtrl.update(input.type);
+        getUI(DOMstrings.addButton).addEventListener('click', addItem);
+        document.addEventListener('keypress', (e) => {
+            if(e.keyCode === 13) {
+                addItem();
+            }
         });
 
         getUI(DOMstrings.containerDiv).addEventListener('click', (e) => {
